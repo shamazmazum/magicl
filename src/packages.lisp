@@ -173,6 +173,7 @@
            #:inv
            #:lu
            #:lu-solve
+           #:svdls
            #:csd-blocks
            #:csd
            #:svd
@@ -186,6 +187,7 @@
            #:logm
            #:expih
            #:linear-solve
+           #:least-squares
 
            #:polynomial
            #:make-polynomial

@@ -28,6 +28,8 @@
                               matrix-class type (lapack-routine "getrf"))
                              (generate-lapack-lu-solve-for-type
                               matrix-class type (lapack-routine "getrs"))
+                             (generate-lapack-svdls-for-type
+                              matrix-class type (lapack-routine "gelsd"))
                              (generate-lapack-inv-for-type
                               matrix-class type
                               (lapack-routine "getrf") (lapack-routine "getri"))

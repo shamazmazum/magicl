@@ -292,3 +292,17 @@
 
   (signals magicl::rank-deficiency-error
     (magicl:linear-solve (magicl:ones '(3 3)) (magicl:ones '(3)))))
+
+(deftest test-least-squares ()
+  "Check that we can solve ordinary least squares."
+  (let ((A (magicl:from-list '((1d0 1d0) (2d0 1d0) (3d0 1d0) (4d0 1d0)) '(4 2)))
+        (b (magicl:from-list '(0d0 1d0 5d0 6d0) '(4))))
+    (let ((x (magicl:least-squares A b)))
+      (is (magicl:= x (magicl:from-list '(2.2d0 -2.5d0) '(2)))))
+
+    (signals error (magicl:least-squares A (magicl:from-list '(0d0 1d0 5d0) '(3)))))
+
+  (let ((A (magicl:from-list '((1d0 1d0) (2d0 1d0) (3d0 1d0) (4d0 1d0)) '(4 2)))
+        (b (magicl:from-list '((0d0 0d0) (1d0 1d0) (5d0 2d0) (6d0 3d0)) '(4 2))))
+    (let ((x (magicl:least-squares A b)))
+      (is (magicl:= x (magicl:from-list '((2.2d0 1d0) (-2.5d0 -1d0)) '(2 2)))))))

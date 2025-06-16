@@ -17,6 +17,8 @@
 
 (magicl:extend-function (magicl:lu-solve lapack-lu-solve :lapack) (lu ipiv b))
 
+(magicl:extend-function (magicl:svdls lapack-svdls :lapack) (a b rcond))
+
 (magicl:extend-function (magicl:inv lapack-inv :lapack) (matrix))
 
 (magicl:extend-function (magicl:csd-blocks csd-blocks-extension :lapack) (matrix p q))

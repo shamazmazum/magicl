@@ -567,6 +567,9 @@ So assuming P is a permutation matrix representing IPIV, we have
 (define-backend-function lu-solve (lu ipiv b)
   "Solve the system AX=B, where A is a square matrix, B is a compatibly shaped matrix, and A has PLU factorization indicated by the permutation vector IPIV and lower & upper triangular portions of the argument LU.")
 
+(define-backend-function svdls (a b &optional rcond)
+  "Solve the linear least squares problem: argmin_X ||B-AX||^2 using the singular value decomposition (SVD) of A. A is a M-by-N matrix, and B is a M-by-NRHS right hand side matrix. Return the solution as a N-by-NRHS solution matrix. The effective rank of A is determined by treating as zero those singular values which are less than RCOND times the largest singular value.")
+
 (define-extensible-function (csd-blocks csd-blocks-lisp) (matrix p q)
   (:documentation "Compute the cosine-sine decomposition of the matrix MATRIX and return the result as blocks. See LISP-CSD-BLOCKS for mathematical details.
 
@@ -677,3 +680,12 @@ NOTE: If H is not Hermitian, the behavior is undefined.")
                  :matrix A)))
       (let ((rmat (lu-solve lu ipiv bmat)))
         (from-storage (storage rmat) (shape b))))))
+
+(defun least-squares (a b &optional rcond)
+  "Attempt to solve the ordinary least squares problem argmin_X ||B-AX||^2. Returns X.
+
+The effective rank of A is determined by treating as zero those singular values which are less than RCOND times the largest singular value."
+  (cond ((vector-p b)
+         (column-matrix->vector (svdls a (vector->column-matrix b) rcond)))
+        (t
+         (svdls a b rcond))))

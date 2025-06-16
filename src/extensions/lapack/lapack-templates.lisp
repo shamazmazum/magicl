@@ -149,6 +149,75 @@
         info)
        b-tensor)))
 
+(defun generate-lapack-svdls-for-type (class type lstsq-function)
+  `(defmethod lapack-svdls ((a ,class) (b-tensor ,class) rcond)
+     (let* ((m (nrows a))
+            (n (ncols a)))
+       (policy-cond:with-expectations (> speed safety)
+           ((assertion (cl:= m (nrows b-tensor))))
+         (let* ((nrhs (ncols b-tensor))
+                (a (magicl::storage (deep-copy-tensor (if (eql :row-major (layout a)) (transpose a) a))))
+                (lda m)
+                (ldb (max m n))
+                (b (make-array (* ldb nrhs) :element-type ',type))
+                (s (make-array (min m n) :element-type ',type))
+                (rcond (or rcond
+                           (* (max m n)
+                              ,(cond ((or (eq type 'single-float)
+                                          (equal type '(complex single-float)))
+                                      'single-float-epsilon)
+                                     ((or (eq type 'double-float)
+                                          (equal type '(complex double-float)))
+                                      'double-float-epsilon)
+                                     (t (error "Unknown type for lapack-svdls: ~a" type))))))
+                (rank 0)
+                (work1 (make-array 1 :element-type ',type))
+                (work nil)
+                (lwork -1)
+                (iwork1 (make-array 1 :element-type '(signed-byte 32)))
+                (iwork nil)
+                (info 0))
+           (setf (subseq b 0)
+                 (magicl::storage
+                  (if (eql :row-major (layout b-tensor)) (transpose b-tensor) b-tensor)))
+           ;; Perform work size query with work of length 1
+           (,lstsq-function
+            m
+            n
+            nrhs
+            a
+            lda
+            b
+            ldb
+            s
+            rcond
+            rank
+            work1
+            lwork
+            iwork1
+            info)
+           (setf lwork (round (realpart (aref work1 0))))
+           (setf work (make-array (max 1 lwork) :element-type ',type))
+           (setf iwork (make-array (max 1 (aref iwork1 0)) :element-type '(signed-byte 32)))
+           ;; Perform actual operation with correct work size
+           (,lstsq-function
+            m
+            n
+            nrhs
+            a
+            lda
+            b
+            ldb
+            s
+            rcond
+            rank
+            work
+            lwork
+            iwork
+            info)
+           (let ((sol (magicl::from-storage b (list ldb nrhs) :layout :column-major)))
+             (slice sol (list 0 0) (list n nrhs))))))))
+
 (defun generate-lapack-inv-for-type (class type lu-function inv-function)
   `(defmethod lapack-inv ((a ,class))
      (let ((a-tensor (deep-copy-tensor a)))

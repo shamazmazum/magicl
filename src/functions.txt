@@ -16,6 +16,7 @@ gges
 gees
 getrf
 getrs
+gelsd
 getri
 gesvd
 geev
