@@ -223,7 +223,7 @@
             (work nil)
             ,@(when real-type
                 `((rwork (make-array (* 5 (min rows cols)) :element-type ',real-type)))))
-       (let ((u (make-array (* ldu rows) :element-type ',type))
+       (let ((u (make-array (* ldu u-cols) :element-type ',type))
              (vt (make-array (* ldvt cols) :element-type ',type)))
          ;; run it once as a workspace query
          (,svd-function jobu jobvt rows cols a lda s u ldu vt ldvt
