@@ -11,9 +11,9 @@
   #+:magicl.use-mkl
   (:unix  "libmkl_rt.so")
   #-:magicl.use-mkl
-  (:unix  (:or "libblas.so"
-               "libblas.so.3"))
-  (t (:default "libblas")))
+  (:unix  (:or "libopenblas.so"
+               "libopenblas.so.0"))
+  (t (:default "libopenblas")))
 
 (pushnew 'libblas *foreign-libraries*)
 (export 'libblas)
